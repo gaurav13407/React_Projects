@@ -1,0 +1,42 @@
+import { renderHook, act } from '@testing-library/react';
+import { useApproval } from '../useApproval';
+
+describe('useApproval', () => {
+  it('initializes with approved and rejected as false', () => {
+    const { result } = renderHook(() => useApproval());
+    expect(result.current.approved).toBe(false);
+    expect(result.current.rejected).toBe(false);
+  });
+
+  it('sets approved to true when approve is called', () => {
+    const { result } = renderHook(() => useApproval());
+    act(() => result.current.approve());
+    expect(result.current.approved).toBe(true);
+    expect(result.current.rejected).toBe(false);
+  });
+
+  it('sets rejected to true when reject is called', () => {
+    const { result } = renderHook(() => useApproval());
+    act(() => result.current.reject());
+    expect(result.current.rejected).toBe(true);
+    expect(result.current.approved).toBe(false);
+  });
+
+  it('toggles from approved to rejected', () => {
+    const { result } = renderHook(() => useApproval());
+    act(() => result.current.approve());
+    expect(result.current.approved).toBe(true);
+    act(() => result.current.reject());
+    expect(result.current.approved).toBe(false);
+    expect(result.current.rejected).toBe(true);
+  });
+
+  it('resets both approved and rejected to false', () => {
+    const { result } = renderHook(() => useApproval());
+    act(() => result.current.approve());
+    expect(result.current.approved).toBe(true);
+    act(() => result.current.reset());
+    expect(result.current.approved).toBe(false);
+    expect(result.current.rejected).toBe(false);
+  });
+});

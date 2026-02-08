@@ -1,0 +1,67 @@
+import { render, screen, fireEvent } from '@testing-library/react';
+import { CommentBox } from '../CommentBox';
+
+describe('CommentBox', () => {
+  it('renders input and post button', () => {
+    render(<CommentBox onPost={() => {}} />);
+    expect(screen.getByPlaceholderText('Add a comment...')).toBeInTheDocument();
+    expect(screen.getByText('Post')).toBeInTheDocument();
+  });
+
+  it('calls onPost with input value when post button is clicked', () => {
+    const mockOnPost = jest.fn();
+    render(<CommentBox onPost={mockOnPost} />);
+    const input = screen.getByPlaceholderText('Add a comment...');
+    fireEvent.change(input, { target: { value: 'Great article!' } });
+    fireEvent.click(screen.getByText('Post'));
+    expect(mockOnPost).toHaveBeenCalledWith('Great article!');
+  });
+
+  it('clears input after posting', () => {
+    const mockOnPost = jest.fn();
+    render(<CommentBox onPost={mockOnPost} />);
+    const input = screen.getByPlaceholderText('Add a comment...') as HTMLTextAreaElement;
+    fireEvent.change(input, { target: { value: 'Test comment' } });
+    fireEvent.click(screen.getByText('Post'));
+    expect(input.value).toBe('');
+  });
+
+  it('does not call onPost with empty input', () => {
+    const mockOnPost = jest.fn();
+    render(<CommentBox onPost={mockOnPost} />);
+    fireEvent.click(screen.getByText('Post'));
+    expect(mockOnPost).not.toHaveBeenCalled();
+  });
+
+  it('does not call onPost with whitespace only input', () => {
+    const mockOnPost = jest.fn();
+    render(<CommentBox onPost={mockOnPost} />);
+    const input = screen.getByPlaceholderText('Add a comment...');
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.click(screen.getByText('Post'));
+    expect(mockOnPost).not.toHaveBeenCalled();
+  });
+
+  it('calls onPost when Enter key is pressed', () => {
+    const mockOnPost = jest.fn();
+    render(<CommentBox onPost={mockOnPost} />);
+    const input = screen.getByPlaceholderText('Add a comment...');
+    fireEvent.change(input, { target: { value: 'Keyboard test' } });
+    fireEvent.keyPress(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+    expect(mockOnPost).toHaveBeenCalledWith('Keyboard test');
+  });
+
+  it('does not call onPost when Shift+Enter is pressed', () => {
+    const mockOnPost = jest.fn();
+    render(<CommentBox onPost={mockOnPost} />);
+    const input = screen.getByPlaceholderText('Add a comment...');
+    fireEvent.change(input, { target: { value: 'Multiline\ntest' } });
+    fireEvent.keyPress(input, { key: 'Enter', shiftKey: true, charCode: 13 });
+    expect(mockOnPost).not.toHaveBeenCalled();
+  });
+
+  it('accepts custom placeholder', () => {
+    render(<CommentBox onPost={() => {}} placeholder="Leave your feedback" />);
+    expect(screen.getByPlaceholderText('Leave your feedback')).toBeInTheDocument();
+  });
+});

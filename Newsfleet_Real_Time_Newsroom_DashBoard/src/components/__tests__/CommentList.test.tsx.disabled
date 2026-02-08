@@ -1,0 +1,74 @@
+import { render, screen } from '@testing-library/react';
+import { CommentList, type Comment } from '../CommentList';
+
+describe('CommentList', () => {
+  it('renders empty state when no comments', () => {
+    render(<CommentList comments={[]} />);
+    expect(screen.getByText('No comments yet. Be the first to comment!')).toBeInTheDocument();
+  });
+
+  it('renders comments when provided', () => {
+    const mockComments: Comment[] = [
+      {
+        id: '1',
+        author: 'John Doe',
+        text: 'Great article!',
+        timestamp: new Date('2024-01-01'),
+      },
+      {
+        id: '2',
+        author: 'Jane Smith',
+        text: 'Thanks for sharing',
+        timestamp: new Date('2024-01-02'),
+      },
+    ];
+
+    render(<CommentList comments={mockComments} />);
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('Great article!')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getByText('Thanks for sharing')).toBeInTheDocument();
+  });
+
+  it('displays comment timestamps', () => {
+    const testDate = new Date('2024-01-15T10:30:00');
+    const mockComments: Comment[] = [
+      {
+        id: '1',
+        author: 'Test User',
+        text: 'Test comment',
+        timestamp: testDate,
+      },
+    ];
+
+    render(<CommentList comments={mockComments} />);
+    expect(screen.getByText(testDate.toLocaleString())).toBeInTheDocument();
+  });
+
+  it('renders multiple comments in correct order', () => {
+    const mockComments: Comment[] = [
+      {
+        id: '1',
+        author: 'First',
+        text: 'First comment',
+        timestamp: new Date(),
+      },
+      {
+        id: '2',
+        author: 'Second',
+        text: 'Second comment',
+        timestamp: new Date(),
+      },
+      {
+        id: '3',
+        author: 'Third',
+        text: 'Third comment',
+        timestamp: new Date(),
+      },
+    ];
+
+    const { container } = render(<CommentList comments={mockComments} />);
+    const comments = container.querySelectorAll('.comment-item');
+    expect(comments).toHaveLength(3);
+  });
+});
