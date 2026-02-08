@@ -3,25 +3,58 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
+// isPortAvailable checks if a port is available
+func isPortAvailable(port int) bool {
+	address := fmt.Sprintf(":%d", port)
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		return false
+	}
+	listener.Close()
+	return true
+}
+
+// findAvailablePort finds the next available port starting from startPort
+func findAvailablePort(startPort int) int {
+	for port := startPort; port < startPort+100; port++ {
+		if isPortAvailable(port) {
+			return port
+		}
+	}
+	log.Fatal("Could not find an available port")
+	return -1
+}
+
 func main() {
-	// Define the projects and their ports
-	projects := map[string]int{
-		"CollabNotes_Real_Time_Collaborative_Notes": 3001,
-		"Designhub":                                  3002,
-		"EduStream_Learning_Platform":                3003,
-		"Medix_Patient_Portal":                       3004,
-		"Newsfleet_Real_Time_Newsroom_DashBoard":     3005,
-		"Secure_Banking_Dashboard":                   3006,
-		"ShopEase_E-Commerce_Platform":               3007,
-		"Smart_Portfolio_Dashboard":                  3008,
-		"StreamVision_Video_Dashboard":               3009,
-		"TaskFlow_Project_Management":                3010,
+	// Define the projects (ports will be assigned dynamically)
+	projectNames := []string{
+		"CollabNotes_Real_Time_Collaborative_Notes",
+		"Designhub",
+		"EduStream_Learning_Platform",
+		"Medix_Patient_Portal",
+		"Newsfleet_Real_Time_Newsroom_DashBoard",
+		"Secure_Banking_Dashboard",
+		"ShopEase_E-Commerce_Platform",
+		"Smart_Portfolio_Dashboard",
+		"StreamVision_Video_Dashboard",
+		"TaskFlow_Project_Management",
+	}
+
+	// Dynamically assign available ports
+	projects := make(map[string]int)
+	currentPort := 3001
+	
+	for _, project := range projectNames {
+		availablePort := findAvailablePort(currentPort)
+		projects[project] = availablePort
+		currentPort = availablePort + 1
 	}
 
 	// Get the directory where the executable is located
